@@ -17,22 +17,23 @@ def test_boston_dataset(spark_session: SparkSession):
     y = boston.target.tolist()
     Xy = [(i + [j]) for (i, j) in zip(X, y)]
     boston_df = spark_session.createDataFrame(Xy, boston_columns)
+    print(feature_names)
+    must_include_features = []
+    # must_include_features = ['TAX', 'INDUS']
 
     # %% Ranking features
-
     ranked_features = feature_ranker(df=boston_df,
                                      feature_columns=feature_names,
-                                     output_column=output_name)
+                                     output_column=output_name,
+                                     must_include_features=must_include_features)
     print(ranked_features)
-
     # %% Feature selection
-
     scores = feature_selector(df=boston_df,
                               ranked_features=ranked_features,
                               output_column=output_name,
                               estimator_obj=RandomForestRegressor(),
                               feature_inclusion_increments=1,
                               train_test_split_ratio=[0.66, 0.33],
-                              cv=1,
+                              cv=-1,
                               evaluation_metric='r2')
     print(scores)
